@@ -1,3 +1,4 @@
+/* --- Body & Container --- */
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
@@ -6,19 +7,20 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .container { width: 480px; max-width: 95%; }
 
+/* --- Logo & Typing --- */
 #logo {
   font-family: monospace;
   font-size: 2.8rem;
   color: #00ff7f;
   animation: blink 1s step-start infinite;
   text-align: center;
+  margin-bottom: 0.5rem;
 }
-
 @keyframes blink { 50% { opacity: 0; } }
 
 .typing-text {
@@ -30,21 +32,21 @@ body {
   margin: 0 auto 1rem;
   animation: typing 2s steps(20) 1, blink-caret 0.75s step-end infinite;
 }
-
 @keyframes typing { from { width: 0; } to { width: 100%; } }
 @keyframes blink-caret { 50% { border-color: transparent; } }
 
+/* --- Glass Panels --- */
 .glass {
   backdrop-filter: blur(15px);
   background: rgba(0,0,0,0.4);
   border-radius: 20px;
   padding: 1rem;
   margin: 1rem 0;
-  text-align: center;
   border: 1px solid rgba(0,255,127,0.4);
-  box-shadow: 0 0 10px rgba(0,255,127,0.4), 0 0 30px rgba(0,255,127,0.1);
+  box-shadow: 0 0 15px rgba(0,255,127,0.4), 0 0 40px rgba(0,255,127,0.1);
 }
 
+/* --- Buttons --- */
 .glow-btn {
   background: #000;
   color: #00ff7f;
@@ -54,50 +56,50 @@ body {
   transition: 0.3s;
   border-radius: 12px;
 }
-.glow-btn:hover { box-shadow: 0 0 15px #00ff7f, 0 0 25px #00ff7f, 0 0 50px #00ff7f; }
-
-.chat-room {
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-  border-radius: 20px;
-  border: 1px solid rgba(0,255,127,0.3);
+.glow-btn:hover {
+  box-shadow: 0 0 15px #00ff7f, 0 0 25px #00ff7f, 0 0 50px #00ff7f;
 }
+.glow-btn.accent { border-color: #00c8ff; color: #00c8ff; }
+.glow-btn.accent:hover { box-shadow: 0 0 15px #00c8ff, 0 0 25px #00c8ff; }
+
+/* --- Chat Room --- */
+.chat-room { display: flex; flex-direction: column; padding: 1rem; border-radius: 20px; border: 1px solid rgba(0,255,127,0.3); }
 
 .chat-box {
   height: 350px;
   overflow-y: auto;
   margin-bottom: 0.5rem;
   padding: 0.5rem;
-  background: rgba(0,0,0,0.25);
-  border-radius: 12px;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
 }
 
+/* --- Modern Card Messages --- */
 .chat-box div {
-  padding: 0.4rem 0.6rem;
-  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  border-radius: 16px;
   max-width: 80%;
   backdrop-filter: blur(5px);
   word-break: break-word;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
-
 .chat-box div:hover { transform: scale(1.02); }
 
 .self-msg {
   align-self: flex-end;
   background: rgba(0,255,127,0.4);
   color: #000;
+  box-shadow: 0 0 10px #00ff7f;
 }
 .other-msg {
   align-self: flex-start;
   background: rgba(0,200,255,0.2);
   color: #00c8ff;
+  box-shadow: 0 0 10px #00c8ff;
 }
 
+/* --- Input --- */
 .input-area { display: flex; gap: 0.5rem; }
 input[type="text"] {
   flex: 1;
@@ -114,6 +116,7 @@ input[type="text"]:focus {
   box-shadow: 0 0 10px #00ff7f, 0 0 20px rgba(0,255,127,0.3);
 }
 
+/* --- Typing Indicator --- */
 #typing-indicator {
   font-size: 0.9rem;
   color: #00ff7f;

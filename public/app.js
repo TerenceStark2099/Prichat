@@ -6,9 +6,10 @@ import {
   onSnapshot,
   query,
   orderBy,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// Firebase config
+// --- Firebase config ---
 const firebaseConfig = {
   apiKey: "AIzaSyDX8yqKPp-X6hjkYiPWkE9sxYdFY4KxVK4",
   authDomain: "prichat-2f245.firebaseapp.com",
@@ -22,7 +23,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// DOM elements
+// --- DOM Elements ---
 const roomInput = document.getElementById("room-code");
 const joinBtn = document.getElementById("join-btn");
 const chatSection = document.querySelector(".chat-room");
@@ -32,13 +33,13 @@ const chatInput = document.getElementById("chat-input");
 const sendBtn = document.getElementById("send-btn");
 const typingIndicator = document.getElementById("typing-indicator");
 
-let roomCode, roomKey, typingTimeout;
+let roomCode, roomKey;
+let displayedMessages = new Set();
 
-// --- Encryption helpers ---
+// --- AES-GCM Encryption Helpers ---
 async function getRoomKeyFromCode(code) {
   const enc = new TextEncoder();
   const hash = await crypto.subtle.digest("SHA-256", enc.encode(code));
-  const iv = new Uint8Array(12);
   const cryptoKey = await crypto.subtle.importKey(
     "raw",
     hash,
@@ -46,50 +47,54 @@ async function getRoomKeyFromCode(code) {
     false,
     ["encrypt", "decrypt"]
   );
-  return { cryptoKey, iv };
+  return cryptoKey;
 }
 
 async function encryptMessage(text, key) {
-  const enc = new TextEncoder();
-  const encoded = enc.encode(text);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encoded = new TextEncoder().encode(text);
   const cipher = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv: key.iv },
-    key.cryptoKey,
+    { name: "AES-GCM", iv: iv },
+    key,
     encoded
   );
-  return btoa(String.fromCharCode(...new Uint8Array(cipher)));
+  return { cipher: btoa(String.fromCharCode(...new Uint8Array(cipher))), iv: btoa(String.fromCharCode(...iv)) };
 }
 
-async function decryptMessage(cipherText, key) {
+async function decryptMessage(cipherText, ivB64, key) {
   try {
-    const bytes = Uint8Array.from(atob(cipherText), c => c.charCodeAt(0));
+    const cipherBytes = Uint8Array.from(atob(cipherText), c => c.charCodeAt(0));
+    const iv = Uint8Array.from(atob(ivB64), c => c.charCodeAt(0));
     const decrypted = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: key.iv },
-      key.cryptoKey,
-      bytes
+      { name: "AES-GCM", iv: iv },
+      key,
+      cipherBytes
     );
     return new TextDecoder().decode(decrypted);
   } catch (e) {
-    console.error("Failed to decrypt message:", e);
+    console.error("Decryption failed:", e);
     return "[Unreadable]";
   }
 }
 
-// --- Display messages ---
+// --- Display message ---
 function displayMessage(msg, type="other") {
+  const msgId = msg.id || Math.random();
+  if (displayedMessages.has(msgId)) return;
+  displayedMessages.add(msgId);
+
   const msgEl = document.createElement("div");
-  msgEl.textContent = msg;
+  msgEl.textContent = msg.text || msg;
   msgEl.className = type === "self" ? "self-msg" : "other-msg";
   chatBox.appendChild(msgEl);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// --- Room join ---
+// --- Join room ---
 joinBtn.addEventListener("click", async () => {
   const code = roomInput.value.trim();
   if (!code) return alert("Enter a room code!");
   roomCode = code;
-
   roomKey = await getRoomKeyFromCode(roomCode);
 
   joinSection.hidden = true;
@@ -99,44 +104,45 @@ joinBtn.addEventListener("click", async () => {
   const q = query(messagesRef, orderBy("timestamp"));
 
   // Listen for new messages
-  onSnapshot(q, async (snapshot) => {
-    chatBox.innerHTML = "";
+  onSnapshot(q, async snapshot => {
     for (let doc of snapshot.docs) {
       const data = doc.data();
-      const decrypted = await decryptMessage(data.text, roomKey);
-      displayMessage(decrypted, "other");
+      const decrypted = await decryptMessage(data.text, data.iv, roomKey);
+      displayMessage({ text: decrypted, id: doc.id }, "other");
     }
   });
 
   // Typing indicator
   const typingRef = collection(db, "rooms", roomCode, "typing");
-  onSnapshot(typingRef, (snapshot) => {
+  onSnapshot(typingRef, snapshot => {
     const othersTyping = snapshot.docs.some(doc => doc.data().user !== "me");
     typingIndicator.textContent = othersTyping ? "Someone is typing..." : "";
   });
 
-  // Send message events
-  sendBtn.onclick = () => sendMessage();
-  chatInput.onkeypress = (e) => { if (e.key === "Enter") sendMessage(); };
-
   // Input typing
   chatInput.addEventListener("input", async () => {
     await addDoc(typingRef, { user: "me", timestamp: Date.now() });
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => {
-      // Could implement deletion or TTL for typing docs
-    }, 1500);
   });
+
+  // Send message
+  sendBtn.onclick = () => sendMessage();
+  chatInput.onkeypress = (e) => { if (e.key === "Enter") sendMessage(); };
 });
 
 // --- Send message ---
 async function sendMessage() {
   const text = chatInput.value.trim();
   if (!text) return;
-  displayMessage(text, "self"); // Show locally
   chatInput.value = "";
+
+  // Display immediately
+  displayMessage(text, "self");
 
   const messagesRef = collection(db, "rooms", roomCode, "messages");
   const encrypted = await encryptMessage(text, roomKey);
-  await addDoc(messagesRef, { text: encrypted, timestamp: Date.now() });
+  await addDoc(messagesRef, {
+    text: encrypted.cipher,
+    iv: encrypted.iv,
+    timestamp: serverTimestamp()
+  });
 }

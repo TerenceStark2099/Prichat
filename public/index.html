@@ -7,25 +7,22 @@
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1 id="logo">Prichat</h1>
-    </header>
+    <div id="logo">██████╗ ██████╗ ██╗ ██████╗ ███████╗████████╗</div>
+    <div class="typing-text">Privacy Matters</div>
 
-    <!-- Room Join Section -->
-    <section class="join-room glass">
-      <h2 class="typing-text">Privacy Matters</h2>
-      <input type="text" id="room-code" placeholder="Enter room code">
+    <div class="join-room glass">
+      <input type="text" id="room-code" placeholder="Enter Room Code" />
       <button id="join-btn" class="glow-btn">Join Room</button>
-    </section>
+    </div>
 
-    <!-- Chat Room -->
-    <section class="chat-room glass" hidden>
+    <div class="chat-room glass" hidden>
       <div id="chat-box" class="chat-box"></div>
+      <div id="typing-indicator"></div>
       <div class="input-area">
-        <input type="text" id="chat-input" placeholder="Type a message...">
-        <button id="send-btn" class="glow-btn">Send</button>
+        <input type="text" id="chat-input" placeholder="Type a message..." />
+        <button id="send-btn" class="glow-btn accent">Send</button>
       </div>
-    </section>
+    </div>
   </div>
 
   <script type="module" src="app.js"></script>
