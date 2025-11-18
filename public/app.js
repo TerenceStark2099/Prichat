@@ -1,5 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -11,6 +18,7 @@ const firebaseConfig = {
   appId: "1:125882416830:web:f57c9970c044ea809ee8ef",
   measurementId: "G-XGLT8TN83Z"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -29,7 +37,7 @@ let roomCode;
 async function getRoomKeyFromCode(code) {
   const enc = new TextEncoder();
   const hash = await crypto.subtle.digest("SHA-256", enc.encode(code));
-  const iv = new Uint8Array(12); // fixed IV
+  const iv = new Uint8Array(12); // fixed IV for simplicity
   const cryptoKey = await crypto.subtle.importKey(
     "raw",
     hash,
@@ -43,14 +51,27 @@ async function getRoomKeyFromCode(code) {
 async function encryptMessage(text, key) {
   const enc = new TextEncoder();
   const encoded = enc.encode(text);
-  const cipher = await crypto.subtle.encrypt({ name: "AES-GCM", iv: key.iv }, key.cryptoKey, encoded);
+  const cipher = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: key.iv },
+    key.cryptoKey,
+    encoded
+  );
   return btoa(String.fromCharCode(...new Uint8Array(cipher)));
 }
 
 async function decryptMessage(cipherText, key) {
-  const bytes = Uint8Array.from(atob(cipherText), c => c.charCodeAt(0));
-  const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: key.iv }, key.cryptoKey, bytes);
-  return new TextDecoder().decode(decrypted);
+  try {
+    const bytes = Uint8Array.from(atob(cipherText), c => c.charCodeAt(0));
+    const decrypted = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: key.iv },
+      key.cryptoKey,
+      bytes
+    );
+    return new TextDecoder().decode(decrypted);
+  } catch (e) {
+    console.error("Failed to decrypt message:", e);
+    return "[Unreadable]";
+  }
 }
 
 // --- Display ---
@@ -66,6 +87,7 @@ joinBtn.addEventListener("click", async () => {
   const code = roomInput.value.trim();
   if (!code) return alert("Enter a room code!");
   roomCode = code;
+
   const roomKey = await getRoomKeyFromCode(roomCode);
 
   joinSection.hidden = true;
@@ -81,7 +103,6 @@ joinBtn.addEventListener("click", async () => {
       const decrypted = await decryptMessage(data.text, roomKey);
       displayMessage(decrypted);
     }
-    cleanupEmptyRoom();
   });
 
   sendBtn.onclick = () => sendMessage(roomKey);
@@ -96,15 +117,4 @@ async function sendMessage(roomKey) {
   const encrypted = await encryptMessage(text, roomKey);
   await addDoc(messagesRef, { text: encrypted, timestamp: Date.now() });
   chatInput.value = "";
-}
-
-// --- Auto cleanup ---
-async function cleanupEmptyRoom() {
-  const messagesRef = collection(db, "rooms", roomCode, "messages");
-  const snapshot = await getDocs(messagesRef);
-  if (snapshot.empty) {
-    for (let docSnap of snapshot.docs) {
-      await deleteDoc(doc(db, "rooms", roomCode, "messages", docSnap.id));
-    }
-  }
 }
