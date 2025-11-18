@@ -30,14 +30,15 @@ const joinSection = document.querySelector(".join-room");
 const chatBox = document.getElementById("chat-box");
 const chatInput = document.getElementById("chat-input");
 const sendBtn = document.getElementById("send-btn");
+const typingIndicator = document.getElementById("typing-indicator");
 
-let roomCode;
+let roomCode, roomKey, typingTimeout;
 
 // --- Encryption helpers ---
 async function getRoomKeyFromCode(code) {
   const enc = new TextEncoder();
   const hash = await crypto.subtle.digest("SHA-256", enc.encode(code));
-  const iv = new Uint8Array(12); // fixed IV for simplicity
+  const iv = new Uint8Array(12);
   const cryptoKey = await crypto.subtle.importKey(
     "raw",
     hash,
@@ -74,10 +75,11 @@ async function decryptMessage(cipherText, key) {
   }
 }
 
-// --- Display ---
-function displayMessage(msg) {
+// --- Display messages ---
+function displayMessage(msg, type="other") {
   const msgEl = document.createElement("div");
   msgEl.textContent = msg;
+  msgEl.className = type === "self" ? "self-msg" : "other-msg";
   chatBox.appendChild(msgEl);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
@@ -88,7 +90,7 @@ joinBtn.addEventListener("click", async () => {
   if (!code) return alert("Enter a room code!");
   roomCode = code;
 
-  const roomKey = await getRoomKeyFromCode(roomCode);
+  roomKey = await getRoomKeyFromCode(roomCode);
 
   joinSection.hidden = true;
   chatSection.hidden = false;
@@ -96,25 +98,45 @@ joinBtn.addEventListener("click", async () => {
   const messagesRef = collection(db, "rooms", roomCode, "messages");
   const q = query(messagesRef, orderBy("timestamp"));
 
+  // Listen for new messages
   onSnapshot(q, async (snapshot) => {
     chatBox.innerHTML = "";
-    for (let docChange of snapshot.docs) {
-      const data = docChange.data();
+    for (let doc of snapshot.docs) {
+      const data = doc.data();
       const decrypted = await decryptMessage(data.text, roomKey);
-      displayMessage(decrypted);
+      displayMessage(decrypted, "other");
     }
   });
 
-  sendBtn.onclick = () => sendMessage(roomKey);
-  chatInput.onkeypress = (e) => { if (e.key === "Enter") sendMessage(roomKey); };
+  // Typing indicator
+  const typingRef = collection(db, "rooms", roomCode, "typing");
+  onSnapshot(typingRef, (snapshot) => {
+    const othersTyping = snapshot.docs.some(doc => doc.data().user !== "me");
+    typingIndicator.textContent = othersTyping ? "Someone is typing..." : "";
+  });
+
+  // Send message events
+  sendBtn.onclick = () => sendMessage();
+  chatInput.onkeypress = (e) => { if (e.key === "Enter") sendMessage(); };
+
+  // Input typing
+  chatInput.addEventListener("input", async () => {
+    await addDoc(typingRef, { user: "me", timestamp: Date.now() });
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      // Could implement deletion or TTL for typing docs
+    }, 1500);
+  });
 });
 
 // --- Send message ---
-async function sendMessage(roomKey) {
+async function sendMessage() {
   const text = chatInput.value.trim();
   if (!text) return;
+  displayMessage(text, "self"); // Show locally
+  chatInput.value = "";
+
   const messagesRef = collection(db, "rooms", roomCode, "messages");
   const encrypted = await encryptMessage(text, roomKey);
   await addDoc(messagesRef, { text: encrypted, timestamp: Date.now() });
-  chatInput.value = "";
 }
