@@ -11,15 +11,20 @@
       <h1 id="logo">Prichat</h1>
     </header>
 
+    <!-- Room Join Section -->
     <section class="join-room glass">
       <h2 class="typing-text">Privacy Matters</h2>
       <input type="text" id="room-code" placeholder="Enter room code">
       <button id="join-btn" class="glow-btn">Join Room</button>
     </section>
 
-    <section class="chat-room neuromorphic glass" hidden>
+    <!-- Chat Room -->
+    <section class="chat-room glass" hidden>
       <div id="chat-box" class="chat-box"></div>
-      <input type="text" id="chat-input" placeholder="Type a message...">
+      <div class="input-area">
+        <input type="text" id="chat-input" placeholder="Type a message...">
+        <button id="send-btn" class="glow-btn">Send</button>
+      </div>
     </section>
   </div>
 
