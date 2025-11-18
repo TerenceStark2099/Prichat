@@ -1,36 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prichat</title>
-<link rel="stylesheet" href="style.css">
-<script type="module" src="app.js" defer></script>
+  <meta charset="UTF-8">
+  <title>Prichat</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <canvas id="matrix"></canvas>
-
   <div class="container">
-    <pre class="ascii-logo">
-██████╗ ██████╗ ██╗ ██████╗ ███████╗████████╗
-██╔══██╗██╔══██╗██║██╔═══██╗██╔════╝╚══██╔══╝
-██████╔╝██████╔╝██║██║   ██║█████╗     ██║
-██╔═══╝ ██╔══██╗██║██║   ██║██╔══╝     ██║
-██║     ██║  ██║██║╚██████╔╝███████╗   ██║
-    </pre>
+    <header>
+      <h1 id="logo">Prichat</h1>
+    </header>
 
-    <div class="typing-text">Privacy matters...</div>
+    <section class="join-room glass">
+      <h2 class="typing-text">Privacy Matters</h2>
+      <input type="text" id="room-code" placeholder="Enter room code">
+      <button id="join-btn" class="glow-btn">Join Room</button>
+    </section>
 
-    <div class="room-input">
-      <input type="text" id="roomCode" placeholder="Enter room code">
-      <button id="joinBtn">Join Room</button>
-    </div>
-
-    <div id="chatbox" class="chatbox hidden">
-      <div id="messages"></div>
-      <input type="text" id="messageInput" placeholder="Type a message">
-      <button id="sendBtn">Send</button>
-    </div>
+    <section class="chat-room neuromorphic glass" hidden>
+      <div id="chat-box" class="chat-box"></div>
+      <input type="text" id="chat-input" placeholder="Type a message...">
+    </section>
   </div>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>
