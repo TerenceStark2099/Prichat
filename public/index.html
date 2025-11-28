@@ -2,29 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Prichat</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <div id="logo">██████╗ ██████╗ ██╗ ██████╗ ███████╗████████╗</div>
-    <div class="typing-text">Privacy Matters</div>
-
-    <div class="join-room glass">
-      <input type="text" id="room-code" placeholder="Enter Room Code" />
-      <button id="join-btn" class="glow-btn">Join Room</button>
-    </div>
-
-    <div class="chat-room glass" hidden>
-      <div id="chat-box" class="chat-box"></div>
-      <div id="typing-indicator"></div>
-      <div class="input-area">
-        <input type="text" id="chat-input" placeholder="Type a message..." />
-        <button id="send-btn" class="glow-btn accent">Send</button>
-      </div>
-    </div>
+    <pre class="logo">
+ ___  __   _____  ___         _   _____ 
+  / _ \/__\  \_   \/ __\ /\  /\/_\ /__   \
+ / /_)/ \//   / /\/ /   / /_/ //_\\  / /\/
+/ ___/ _  \/\/ /_/ /___/ __  /  _  \/ /   
+\/   \/ \_/\____/\____/\/ /_/\_/ \_/\/    
+                                          </pre>
+    <h1 class="typing">Privacy matters</h1>
+    <input type="text" id="roomCode" placeholder="Enter room code">
+    <button id="enterRoom">Enter Chat</button>
   </div>
 
-  <script type="module" src="app.js"></script>
+  <div class="chat-container hidden">
+    <div class="chat-header">
+      <h2 id="roomTitle"></h2>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <input type="text" id="messageInput" placeholder="Type a message...">
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
