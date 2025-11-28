@@ -1,14 +1,6 @@
 <script type="module" src="firebase-config.js"></script>
 <script src="app.js"></script> ```
 
-The browser sees `app.js` as a regular script and runs it *before* the module system has fully processed the exports, leading to errors when `app.js` tries to access imports.
-
-### ✅ The Solution: Make `app.js` a Module
-
-Simply add `type="module"` to your `app.js` script tag, and crucially, make sure it's loaded **after** the configuration file, although the module system manages dependencies, it's best practice.
-
-### 🚀 Corrected `index.html`
-
 ```html
 <!DOCTYPE html>
 <html lang="en">
