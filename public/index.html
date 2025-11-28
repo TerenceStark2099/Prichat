@@ -1,35 +1,47 @@
+<script type="module" src="firebase-config.js"></script>
+<script src="app.js"></script> ```
+
+The browser sees `app.js` as a regular script and runs it *before* the module system has fully processed the exports, leading to errors when `app.js` tries to access imports.
+
+### ✅ The Solution: Make `app.js` a Module
+
+Simply add `type="module"` to your `app.js` script tag, and crucially, make sure it's loaded **after** the configuration file, although the module system manages dependencies, it's best practice.
+
+### 🚀 Corrected `index.html`
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prichat</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prichat - Secure Incognito Chat</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <pre class="logo">
- ___  __   _____  ___         _   _____ 
-  / _ \/__\  \_   \/ __\ /\  /\/_\ /__   \
- / /_)/ \//   / /\/ /   / /_/ //_\\  / /\/
-/ ___/ _  \/\/ /_/ /___/ __  /  _  \/ /   
-\/   \/ \_/\____/\____/\/ /_/\_/ \_/\/    
-                                          </pre>
-    <h1 class="typing">Privacy matters</h1>
-    <input type="text" id="roomCode" placeholder="Enter room code">
-    <button id="enterRoom">Enter Chat</button>
-  </div>
+  <div class="container">
+    <pre class="logo">
+ ___  __   _____  ___         _   _____ 
+  / _ \/__\  \_   \/ __\ /\  /\/_\ /__   \
+ / /_)/ \//   / /\/ /   / /_/ //_\\  / /\/
+/ ___/ _  \/\/ /_/ /___/ __  /  _  \/ /   
+\/   \/ \_/\____/\____/\/ /_/\_/ \_/\/    
+                                          </pre>
+    <h1 class="typing">Privacy matters</h1>
+    <input type="text" id="roomCode" placeholder="Enter room code (or leave blank to create new)">
+    <button id="enterRoom">Enter Incognito Chat</button>
+  </div>
 
-  <div class="chat-container hidden">
-    <div class="chat-header">
-      <h2 id="roomTitle"></h2>
-    </div>
-    <div class="chat-messages" id="chatMessages"></div>
-    <input type="text" id="messageInput" placeholder="Type a message...">
-    <button id="sendBtn">Send</button>
-  </div>
+  <div class="chat-container hidden">
+    <div class="chat-header">
+      <h2 id="roomTitle"></h2>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <input type="text" id="messageInput" placeholder="Type an E2E encrypted message...">
+    <button id="sendBtn">Send</button>
+  </div>
 
-  <script type="module" src="firebase-config.js"></script>
-  <script src="app.js"></script>
+    <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="app.js"></script> 
 </body>
 </html>

@@ -15,7 +15,6 @@ It runs entirely in the browser — no server, no accounts, no tracking. Works o
 - **Temporary Chat Rooms:** Rooms exist only while users are active; messages are ephemeral.  
 - **Dark Mode Minimalist Design:** Black background, neon green text, retro terminal style.  
 - **ASCII Logo & Typing Animation:** Terminal-inspired aesthetics.  
-- **Matrix-like Background & Glow Buttons:** Stylish hacker vibe.  
 - **Cross-Platform:** Works anywhere a browser is available.
 
 ---
