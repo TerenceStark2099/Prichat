@@ -1,20 +1,16 @@
 {
   "rules": {
     "rooms": {
-      // WARNING: These rules allow ANY authenticated or unauthenticated user 
-      // who knows your database URL to read and write to the 'rooms' node.
-      // This is necessary because Prichat does not use Firebase Authentication.
+
       ".read": "true",
       ".write": "true",
 
-      // Add validation to ensure messages have the correct structure
       "$roomCode": {
         "$messageId": {
           ".validate": "newData.hasChildren(['message', 'timestamp', 'senderID'])"
         }
       }
     },
-    // Prevent random users from writing to the root of the database outside of 'rooms'
     ".read": "false",
     ".write": "false"
   }
