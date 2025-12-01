@@ -90,7 +90,7 @@ const [container, roomInput, enterRoomBtn, chatContainer, chatTitle, chatMessage
     document.getElementById('chatMessages'),
     document.getElementById('messageInput'),
     document.getElementById('sendBtn'),
-    document.getElementById('leaveRoom') // <-- NEW ELEMENT
+    document.getElementById('leaveRoom') 
 ];
 
 let roomCode = '';
@@ -111,25 +111,31 @@ function generateRandomCode() {
 
 /**
  * Deletes the room from Firebase and resets the application state.
+ * FIXED: UI reset now happens synchronously before the asynchronous Firebase call.
  */
 function deleteRoomCleanup() {
-    if (roomCode) {
-        // 1. Delete the room node from Firebase
-        // NOTE: This remove command is what implements the "self-destruct" feature
-        remove(ref(db, `rooms/${roomCode}`))
-            .then(() => console.log(`Room ${roomCode} self-destructed by user or tab close.`))
-            .catch(error => console.error("Error during room self-destruct:", error));
-    }
+    // 1. Reset UI State (Synchronous and immediate for user experience)
+    chatMessages.innerHTML = '';
     
-    // 2. Clear state variables
+    // Hide the chat interface
+    chatContainer.classList.add('hidden'); 
+    
+    // Show the initial room entry page <-- THIS IS THE FIX
+    container.classList.remove('hidden'); 
+    
+    roomInput.value = ''; 
+    
+    // 2. Clear application state
+    const codeToDelete = roomCode; // Capture code before clearing global variable
     roomCode = '';
     secureAESKey = null;
-    
-    // 3. Reset UI
-    chatMessages.innerHTML = '';
-    chatContainer.classList.add('hidden');
-    container.classList.remove('hidden');
-    roomInput.value = ''; // Clear the input field
+
+    // 3. Delete the room node from Firebase (Asynchronous)
+    if (codeToDelete) {
+        remove(ref(db, `rooms/${codeToDelete}`))
+            .then(() => console.log(`Room ${codeToDelete} self-destructed successfully.`))
+            .catch(error => console.error("Error during room self-destruct:", error));
+    }
 }
 
 
@@ -139,7 +145,6 @@ function setupChatRoom() {
     chatTitle.textContent = `Room: ${roomCode}`;
 
     // 🛑 INCOGNITO CLEANUP: Calls the unified cleanup function on tab/browser close.
-    // This is the core 'self-destruct' feature.
     window.addEventListener('beforeunload', deleteRoomCleanup);
 
     // 🚀 NEW: Listener for the manual "Leave Room" button
