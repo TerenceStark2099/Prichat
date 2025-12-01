@@ -1,12 +1,30 @@
 {
   "hosting": {
     "public": "public",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(png|ico)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=0, must-revalidate"
+          }
+        ]
+      }
+    ],
+    
     "rewrites": [
-      { "source": "**", "destination": "/index.html" }
-    ]
-  },
-  "database": {
-    "rules": "database.rules.json"
+      {
+        "source": "/chat",
+        "destination": "/chat.html"
+      }
+    ],
+
+    "trailingSlash": false
   }
 }
