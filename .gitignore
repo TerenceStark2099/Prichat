@@ -1,31 +1,48 @@
-# --- Prichat Security and Firebase Config ---
+--- Prichat Security and Firebase Config ---
 
-# CRITICAL: Your config file contains the Firebase API key and other secrets.
-# Do NOT commit this to public repositories.
+CRITICAL: Your config file contains the Firebase API key and other secrets.
+
+Do NOT commit this to public repositories.
+
 firebase-config.js
 
-# Firebase cache and Local Emulator Data
+SENSITIVE: Files created during self-signing for Electron.
+
+codesign.key
+codesign.crt
+codesign.pfx
+
+Firebase cache and Local Emulator Data
+
 .firebase/
 .emulatorcacher
 firebase-debug.log*
-firebase-debug.*.log*
+firebase-debug..log
 
-# Uncomment this if you'd like others to create their own Firebase project.
-# Since you are working on a team/deploying, keep this commented for consistency.
-# .firebaserc
+Uncomment this if you'd like others to create their own Firebase project.
 
-# --- Node.js / Dependency Artifacts ---
+Since you are working on a team/deploying, keep this commented for consistency.
+
+.firebaserc
+
+--- Node.js / Dependency Artifacts ---
+
 node_modules/
-/build
 /coverage
 .nyc_output
 .npm
 .eslintcache
 .node_repl_history
 
-# Intermediate and Lock Files
-*.log
-npm-debug.log*
+Electron/Build Output Directories
+
+/dist
+/build
+
+Intermediate and Lock Files
+
+.log
+npm-debug.log
 yarn-debug.log*
 yarn-error.log*
 logs
@@ -39,8 +56,10 @@ bower_components
 *.tgz
 .yarn-integrity
 
-# Environment Variables
+Environment Variables
+
 .env
 
-# dataconnect generated files
+dataconnect generated files
+
 .dataconnect

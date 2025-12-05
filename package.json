@@ -1,0 +1,47 @@
+{
+  "name": "prichat-desktop",
+  "version": "1.0.0",
+  "description": "A secure, E2E encrypted desktop chat application based on the web version.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --publish always"
+  },
+  "keywords": [
+    "electron",
+    "chat",
+    "encryption"
+  ],
+  "author": "TerenceStark2099",
+  "license": "ISC",
+  "dependencies": {
+    "electron-updater": "^6.2.1",
+    "electron-log": "^4.4.8"
+  },
+  "devDependencies": {
+    "electron": "^31.0.1",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.terencestark2099.prichat",
+    "productName": "Prichat",
+    "files": [
+      "main.js",
+      "public/**/*"
+    ],
+    "publish": {
+      "provider": "github",
+      "repo": "Prichat",
+      "owner": "TerenceStark2099",
+      "releaseType": "release"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": true
+    }
+  }
+}
