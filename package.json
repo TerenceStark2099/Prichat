@@ -1,6 +1,6 @@
 {
   "name": "prichat-desktop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A secure, E2E encrypted desktop chat application based on the web version.",
   "main": "main.js",
   "scripts": {
@@ -36,7 +36,8 @@
       "releaseType": "release"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,

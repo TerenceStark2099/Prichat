@@ -16,9 +16,13 @@ function createWindow() {
         height: 700,
         minWidth: 800,
         minHeight: 600,
+        // The icon path assumes you put it in a 'build/' folder in the root.
+        // icon: path.join(__dirname, 'build/icon.ico'), 
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
+            // IMPORTANT: Set the preload script for secure IPC communication
+            preload: path.join(__dirname, 'preload.js') 
         }
     });
 
@@ -31,6 +35,8 @@ function createWindow() {
 
     // Start checking for updates after a brief delay
     mainWindow.webContents.once('did-finish-load', () => {
+        // Send initial version information to the renderer
+        mainWindow.webContents.send('update-status', `App Version: ${app.getVersion()}`);
         setTimeout(checkUpdate, 5000); 
     });
 }
@@ -54,10 +60,17 @@ function checkUpdate() {
 
 autoUpdater.on('checking-for-update', () => {
     console.log('Checking for update...');
+    if (mainWindow) {
+        mainWindow.webContents.send('update-status', 'Checking for update...');
+    }
 });
 
 autoUpdater.on('update-available', (info) => {
     console.log('Update available. Downloading...');
+    if (mainWindow) {
+        mainWindow.webContents.send('update-status', `Update available! Version ${info.version} downloading...`);
+    }
+    // You can remove the dialog here if you prefer the UI to handle it, but I'll keep it for robustness.
     dialog.showMessageBox({
         type: 'info',
         title: 'Prichat Update Available',
@@ -67,6 +80,10 @@ autoUpdater.on('update-available', (info) => {
 });
 
 autoUpdater.on('update-downloaded', (info) => {
+    if (mainWindow) {
+        mainWindow.webContents.send('update-status', 'Update downloaded! Click to restart.');
+    }
+    
     dialog.showMessageBox({
         type: 'info',
         title: 'Update Ready to Install',
@@ -81,4 +98,12 @@ autoUpdater.on('update-downloaded', (info) => {
 
 autoUpdater.on('error', (err) => {
     console.error('Update error:', err);
+    if (mainWindow) {
+        mainWindow.webContents.send('update-status', `Update Error: ${err.message}`);
+    }
+});
+
+// Listener to handle restart request from the renderer process (if needed)
+ipcMain.on('restart-app', () => {
+    autoUpdater.quitAndInstall();
 });
