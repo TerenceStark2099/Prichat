@@ -4,7 +4,7 @@
 
 It runs entirely in the browser — no server, no accounts, no tracking. Works on **Windows, Android, and POS terminals** via any modern web browser.  
 
-> This project was partly developed with the assistance of AI (ChatGPT).
+> This project was partly developed with the assistance of AI.
 
 ---
 
