@@ -97,8 +97,11 @@ let roomCode = '';
 // Temporary ID for message styling/alignment
 const currentUserID = `GUEST-${Math.floor(Math.random() * 10000)}`; 
 
-// Firebase Modular SDK Imports
-import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+// 🛡️ DUPLICATE PROTECTION: Track IDs to prevent double-rendering
+const renderedMessageIds = new Set();
+
+// Firebase Modular SDK Imports (Added 'off' for the fix)
+import { getDatabase, ref, push, onChildAdded, remove, off } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 import { app } from './firebase-config.js'; 
 
 const db = getDatabase(app);
@@ -112,8 +115,14 @@ function generateRandomCode() {
 /**
  * Deletes the room from Firebase and resets the application state.
  * FIXED: UI reset now happens synchronously before the asynchronous Firebase call.
+ * UPDATED: Now clears duplicate tracker and shuts off the database listener.
  */
 function deleteRoomCleanup() {
+    // 0. STOP LISTENER: Prevents ghost messages from appearing during the exit process
+    if (roomCode) {
+        off(ref(db, `rooms/${roomCode}`));
+    }
+
     // 1. Reset UI State (Synchronous and immediate for user experience)
     chatMessages.innerHTML = '';
     
@@ -129,6 +138,7 @@ function deleteRoomCleanup() {
     const codeToDelete = roomCode; // Capture code before clearing global variable
     roomCode = '';
     secureAESKey = null;
+    renderedMessageIds.clear(); // 🧹 Reset duplicate tracking for the next session
 
     // 3. Delete the room node from Firebase (Asynchronous)
     if (codeToDelete) {
@@ -164,6 +174,13 @@ function listenMessages() {
     
     // onChildAdded provides real-time updates for new messages
     onChildAdded(roomRef, async (snapshot) => {
+        const messageId = snapshot.key;
+
+        // 🛑 NEW FIX: DUPLICATE CHECK
+        // If this message key is already in our Set, skip processing entirely.
+        if (renderedMessageIds.has(messageId)) return;
+        renderedMessageIds.add(messageId);
+
         const data = snapshot.val();
         
         // 4. 🔓 DECRYPT the message after receiving
@@ -212,7 +229,7 @@ enterRoomBtn.addEventListener('click', async () => {
         code = generateRandomCode();
         alert(`No code entered. Starting a new incognito room with ID: ${code}`);
     }
-    roomCode = code;
+    roomCode = code.toUpperCase(); // Normalize for consistent key derivation
     
     container.classList.add('hidden');
 
@@ -247,4 +264,9 @@ sendBtn.addEventListener('click', async () => {
         console.error("Error sending or encrypting message:", error);
         alert("Failed to send message. Check connection or console.");
     }
+});
+
+// Added UX enhancement: Send message on Enter key press
+messageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendBtn.click();
 });
