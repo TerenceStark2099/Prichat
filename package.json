@@ -1,6 +1,6 @@
 {
   "name": "prichat-desktop",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A secure, E2E encrypted desktop chat application based on the web version.",
   "main": "main.js",
   "scripts": {
